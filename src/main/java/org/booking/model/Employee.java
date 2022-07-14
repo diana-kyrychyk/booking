@@ -9,11 +9,14 @@ public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private String first_name;
+    private String firstName;
 
-    public Employee(Integer id, String first_name) {
+    private String lastName;
+
+    public Employee(Integer id, String firstName, String lastName) {
         this.id = id;
-        this.first_name = first_name;
+        this.firstName = firstName;
+        this.lastName = lastName;
     }
 
     public Employee() {
@@ -27,11 +30,19 @@ public class Employee {
         this.id = id;
     }
 
-    public String getFirst_name() {
-        return first_name;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setFirst_name(String first_name) {
-        this.first_name = first_name;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 }

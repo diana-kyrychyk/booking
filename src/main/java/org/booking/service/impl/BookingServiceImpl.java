@@ -1,6 +1,8 @@
 package org.booking.service.impl;
 
+import org.booking.exception.EntityNotFoundException;
 import org.booking.exception.InvalidEntityException;
+import org.booking.exception.NotAvailableForBookingException;
 import org.booking.model.Booking;
 import org.booking.model.Employee;
 import org.booking.model.Room;
@@ -13,9 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import org.booking.exception.EntityNotFoundException;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,12 +43,13 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDTO> findAllBookings() {
+    public Page<BookingDTO> findAllBookings(Pageable pageable) {
         LOGGER.debug("findAllDto()");
-        List<Booking> bookings = bookingRepository.findAll();
-        return bookings.stream()
+        Page<Booking> bookingsPage = bookingRepository.findAll(pageable);
+        List<BookingDTO> bookingsList = bookingsPage.stream()
                 .map(booking -> toBookingDto(booking))
                 .collect(Collectors.toList());
+        return new PageImpl<>(bookingsList, pageable, bookingsPage.getTotalElements());
     }
 
     @Override
@@ -57,7 +61,7 @@ public class BookingServiceImpl implements BookingService {
 
         Booking booking = toBookingEntity(bookingDto);
         if (!isAvailable(booking)) {
-            throw new InvalidEntityException("Not available for booking");
+            throw new NotAvailableForBookingException("Not available for booking"); //TODO other exception
         }
         Booking bookingSaved = bookingRepository.save(booking);
         return toBookingDto(bookingSaved);
@@ -66,11 +70,11 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDTO update(BookingDTO bookingDto) {
         if (bookingDto.getId() == null) {
-            throw new InvalidEntityException("ID should be provided to update a booking");
+            throw new InvalidEntityException("ID should be provided to update a booking"); //TODO for devs
         }
         Booking booking = toBookingEntity(bookingDto);
         if (!isAvailable(booking)) {
-            throw new InvalidEntityException("Not available for booking");
+            throw new NotAvailableForBookingException("Not available for booking");
         }
         Booking updatedBooking = bookingRepository.save(booking);
         return toBookingDto(updatedBooking);
@@ -99,7 +103,7 @@ public class BookingServiceImpl implements BookingService {
 
     private Booking findEntityById(Integer id) {
         Optional<Booking> bookingOpt = bookingRepository.findById(id);
-        return bookingOpt.orElseThrow(EntityNotFoundException::new);
+        return bookingOpt.orElseThrow(() -> new EntityNotFoundException(String.format("There is no entity with the >%s<", id)));
     }
 
     private BookingDTO toBookingDto(Booking booking) {
@@ -108,7 +112,9 @@ public class BookingServiceImpl implements BookingService {
         bookingDTO.setDateStart(booking.getDateStart());
         bookingDTO.setDateEnd(booking.getDateEnd());
         bookingDTO.setEmployeeId(booking.getEmployee() != null ? booking.getEmployee().getId() : null);
+        bookingDTO.setEmployeeLastName(booking.getEmployee() != null ? booking.getEmployee().getLastName() : null);
         bookingDTO.setRoomId(booking.getRoom() != null ? booking.getRoom().getId() : null);
+        bookingDTO.setRoomName(booking.getRoom() != null ? booking.getRoom().getName() : null);
         return bookingDTO;
     }
 

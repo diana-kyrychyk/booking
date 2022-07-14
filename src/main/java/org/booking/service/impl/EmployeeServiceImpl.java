@@ -23,7 +23,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private EmployeeDTO toEmployeeDTO(Employee employee) {
         EmployeeDTO employeeDTO = new EmployeeDTO();
         employeeDTO.setId(employee.getId());
-        employeeDTO.setFirst_name(employee.getFirst_name());
+        employeeDTO.setFirst_name(employee.getFirstName());
         employeeDTO.setLast_name(employeeDTO.getLast_name());
         return employeeDTO;
     }

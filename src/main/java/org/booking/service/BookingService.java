@@ -1,12 +1,12 @@
 package org.booking.service;
 
 import org.booking.model.dto.BookingDTO;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface BookingService {
 
-    List<BookingDTO> findAllBookings();
+    Page<BookingDTO> findAllBookings(Pageable pageable);
 
     BookingDTO create(BookingDTO bookingDTO);
 
